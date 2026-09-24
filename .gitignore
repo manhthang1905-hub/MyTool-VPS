@@ -1,0 +1,35 @@
+﻿# ===== Du lieu chay - KHONG dua len =====
+PROJECTS/
+runtime/
+models/
+workspace/
+logs/
+.pytest_cache/
+__pycache__/
+*.pyc
+*.log
+*.lock
+*.pid
+INVENTORY.txt
+# ===== CHANNEL: CHI nhan cau hinh + prompt + script =====
+CHANNEL/**
+!CHANNEL/**/
+!CHANNEL/**/*.yaml
+!CHANNEL/**/*.yml
+!CHANNEL/**/*.md
+!CHANNEL/**/*.py
+CHANNEL/**/chi-so*/
+# ===== Bi mat / cau hinh rieng may =====
+config.json
+secrets.json
+vps.json
+tokens/
+.env
+*.env
+creds*.json
+credentials*.json
+client_secret*.json
+token*.json
+*cookies*.txt
+*.pem
+*.key

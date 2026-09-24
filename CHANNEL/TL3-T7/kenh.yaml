@@ -1,0 +1,231 @@
+# ============================================================================
+#  KÊNH RIÊNG CỦA BẠN — nhân bản từ kênh mẫu “TL4-T7”.
+#  Sửa thoải mái: cập nhật tool KHÔNG đụng vào kênh này (kenh_rieng: true).
+#  Kênh mẫu “TL4-T7” thì được cập nhật theo tool — muốn xem bản mẫu mới
+#  có gì hay thì mở nó ở Quản lý kênh rồi chép tay sang đây.
+# ============================================================================
+﻿# ============================================================================
+#  KÊNH TL4-T7 — 心理のとまり木 — tâm lý, người sống lệch nhịp
+# ============================================================================
+#  Tool tạo tệp này từ khuôn: ngách “Tâm lý” × bộ vẽ “Trắng trơn, nền đào ấm” × khán giả “Nhật Bản”.
+#  Sửa thoải mái — từ giờ đây là tệp của bạn, khuôn không đụng vào nữa.
+#
+#  ⚠ `ky_tu_moi_phut` đi theo GIỌNG ĐỌC, không theo ngôn ngữ chung chung.
+#  Đo 18/08/2026 trên BẢY video thật của kênh TL1-T1: 288–308, trung bình 298. Kanji chở nhiều âm nên thấp hơn hẳn tiếng châu Âu.
+#  Đổi giọng đọc thì đo lại: lấy số ký tự kịch bản chia cho số phút của mp3.
+#
+#  ⚠ KHÔNG BAO GIỜ ĐẶT KHOÁ API VÀO ĐÂY. Tiền của luồng AUTO đi qua đúng một
+#  cửa: ví ShopAPI mà tool đã đăng nhập. Tool có bộ quét, thấy khoá là chặn.
+# ============================================================================
+
+# ── Kênh RIÊNG của chủ máy (đổi 21/09/2026) ──────────────────────────────────
+#  Trước đây tệp này khai `mau_cua_tool: true` — cờ nói với tool rằng đây là
+#  KÊNH MẪU ship kèm bản cài, và cập nhật tool được phép GHI ĐÈ nó để khách
+#  nhận bản mẫu mới hơn (xem `core/kenh.py`, mục "KÊNH MẪU CỦA TOOL hay KÊNH
+#  RIÊNG CỦA KHÁCH").
+#
+#  Nhưng đây không còn là kênh mẫu: nó là kênh thật đang chạy, và tệp này chứa
+#  những con số ĐO TAY trên video thật của chính nó — `ky_tu_moi_phut: 270`
+#  (đo trên bốn lượt có giọng đọc thật), `phut_muc_tieu: 15`,
+#  `chenh_cho_phep: 0.15`, `so_ban_nhap: 3`, `nhan_tieu_de: 心理学`. Một lượt
+#  cập nhật là mất sạch, không hỏi ai.
+#
+#  `kenh_rieng: true` là cờ mà `core/safe_update` KHÔNG BAO GIỜ đụng vào.
+kenh_rieng: true
+ma: "TL3-T7"
+ten: "もうひとつのものさし — tâm lý, người bị đánh giá thấp hơn năng lực"
+ngon_ngu: "ja"
+giong_van: "Japanese — natural, polite but conversational (ていねい体). Warm, intimate, curious."
+#  Đo lại 24/08/2026 trên SÁU lượt có giọng đọc thật của kênh: trung bình 302
+#  — nhưng ĐẾM BẰNG len(), tức tính cả 210–406 ký tự xuống dòng mà không ai
+#  đọc lên. Từ 04/09/2026 tool đo bằng chữ đọc lên (`_do_doc`), nên con số ấy
+#  thừa 10%.
+#
+#  Đo lại 04/09/2026, chữ đọc lên chia cho phút của chính tệp 2-giong-doc.mp3:
+#      0002 → 284    0004 → 258    0005 → 257    0006 → 275
+#  Đối chiếu ngoài: video đối thủ 978 giây, phụ đề 4.505 ký tự → 276.
+#  Lấy 270. Sai số còn lại là nhịp đọc của ElevenLabs dao động theo bài.
+ky_tu_moi_phut: 270
+chu_bia_hoa: false
+voice_id: "b34JylakFZPlGS0BnwyY"
+# ── Độ dài: LUÔN về 10–15 phút, bất kể video gốc dài hay ngắn ─────────────────
+#  Chủ dự án, 24/08/2026: *"kịch bản đối thủ có thể ngắn hoặc dài hơn nhưng nó
+#  sẽ luôn để content của kênh về khoảng 12-15 phút"*; nhắc lại 04/09/2026:
+#  *"kênh tao là khoảng 10-15 phút — nguồn thì đôi khi nó sẽ ngắn sẽ dài nên
+#  không thể theo nguồn được"*. Nên KHÔNG bật `do_dai_theo_goc`.
+#
+#  ═══ VÌ SAO 13 → 15 (04/09/2026) ═══
+#
+#  Mốc cũ là 13, và 13 × 302 = 3.926 ký tự. Nhưng 302 đếm cả xuống dòng, nên
+#  3.926 ký tự thật ra là 14,5 phút chứ không phải 13 — con số trong tệp này
+#  không phải thứ nhận được. Đo bốn video thật: 11,9 / 14,9 / 14,8 / 15,1 phút.
+#
+#  Sửa nhịp về 270 mà giữ 13 thì mục tiêu tụt còn 3.510 ký tự, tức video ngắn
+#  đi hơn một phút so với thứ kênh đang chạy. Chủ dự án chọn giữ nguyên chỗ
+#  đang đứng và gọi đúng tên nó: 15 × 270 = 4.050 ký tự = 15,0 phút thật.
+phut_muc_tieu: 15
+#  Lệch bao nhiêu thì mới gọi bước nắn độ dài (prompt/4-do-dai.md).
+#
+#  ═══ ĐÂY GIỜ LÀ CHỖ DUY NHẤT CANH ĐỘ DÀI (04/09/2026) ═══
+#
+#  Bộ chấm đã bỏ tiêu chí độ dài, lời nhắc viết và lời nhắc hoàn thiện chỉ
+#  còn nói một con số. Đó là đúng — nhưng khi bỏ hết cùng lúc thì không còn
+#  ai canh: lượt 0008 ra 5.076 ký tự = 18,8 phút, vượt cả khoảng 11–17 của
+#  chủ dự án, và lọt qua vì 0,30 cho trần tới 5.265.
+#
+#  0,15 quanh 4.050 = 3.443–4.658 ký tự = 12,8–17,3 phút, gần đúng khoảng
+#  chủ dự án chịu được. Đối chiếu hai lượt thật: 0007 (3.864) vẫn lọt, không
+#  tốn lượt gọi nào; 0008 (5.076) bị bắt, đúng ca cần bắt.
+#
+#  Để mọi ràng buộc độ dài ở ĐÚNG MỘT CHỖ, và là chỗ cơ học — lời nhắc viết
+#  không phải gánh nó, nên nó không cướp chỗ của việc viết hay.
+chenh_cho_phep: 0.15
+do_dai_theo_goc: false
+# ── Viết 3 bản rồi chấm chọn một ──────────────────────────────────────────────
+#  Chủ dự án, 25/08/2026: *"cho nó viết nhiều lần, và chấm điểm các lần tức là
+#  chọn bản tốt nhất"* — rồi *"trên máy này mày cứ cho viết 5 bài"*. Máy này
+#  chữ đi thuê bao Claude nên 5 bản + 1 lượt chấm không tốn thêm gì. Khách đi ví
+#  để 1. Từng bản và bản chấm nằm trong thư mục lượt: 1-ban-A…E.txt,
+#  1-cham-diem.txt. Tiêu chí chấm: prompt/2b-cham.md (hook, giữ chân, bám gốc,
+#  CTA kéo bình luận — theo mục đích YouTube đề xuất).
+#  Hạ 5 → 3 ngày 04/09/2026: chữ tiết kiệm được dồn sang bước viết hook riêng.
+#  Ba bản vẫn đủ để chọn lọc; bản thứ tư, thứ năm gần như không đổi kết quả.
+so_ban_nhap: 3
+# ── Viết riêng ĐOẠN MỞ ĐẦU, chấm bằng tiêu chí riêng ─────────────────────────
+#  Chủ dự án, 04/09/2026: *"bước viết hook sẽ riêng và có tiêu chí chấm riêng
+#  cũng viết hook vài lần để chọn bản ok"*.
+#  Đo được: bộ chấm cả bài chấm 60 giây đầu chung với thân bài nên bản mở sai
+#  kiểu vẫn thắng nhờ thân bài tốt (đúng chuyện của lượt 0005). Tách riêng thì
+#  hook phải tự thắng. Chạy sau cùng, dùng prompt/2d-hook.md + 2e-cham-hook.md.
+so_ban_hook: 3
+#  Sau khi chọn bản: vá đúng "chỗ dễ rớt" bộ chấm chỉ ra (giữ ≥90% câu, rồi bộ
+#  chấm so lại hai bản — không hơn thì bỏ). Thuê bao nên bật; khách đi ví để false.
+hoan_thien: true
+# ── Tiêu đề & chữ bìa: lấy nguyên của đối thủ ────────────────────────────────
+#  Kênh này lấy NGUYÊN tiêu đề đối thủ, và ĐỌC chữ trên ảnh bìa đối thủ làm chữ
+#  bìa — không gọi AI viết lại (bỏ hẳn lượt gọi ấy). Đọc ảnh bìa hỏng thì chữ
+#  bìa lấy đúng tiêu đề đối thủ, không làm vỡ lượt chạy.
+che_do_tieu_de: "nguyen_goc"
+#  Nhãn đầu tiêu đề: đối thủ tự gắn nhãn theo kênh CỦA HỌ (雑学, グレーな心理学…), không phải của kênh
+#  mình. Tra thật trên kênh sống 18/09/2026 (yt-dlp): 9/12 video đã đăng có nhãn khoa học tâm lý/não
+#  bộ ở đầu, và cả 5 video gần nhất theo Công thức V7 đều có. Rỗng thì không đụng gì.
+#
+#  ── 21/09/2026: 心理学 → 脳科学, vì tệp này đòi MỘT CÁI THƯỚC KHÁC ──────────
+#  Kênh này đánh tệp “người bị đánh giá thấp hơn năng lực thật”. Insight của
+#  họ trong `nghien-cuu/tuyen.csv`: *“Tôi nhìn ra thứ người khác không nhìn ra
+#  — mà cái đó không được tính vào đâu cả”*, và thứ họ cần là ĐƯỢC ĐO LẠI BẰNG
+#  MỘT CÁI THƯỚC KHÁC. 心理学 là đúng cái thước cũ — thước mềm, thước đoán
+#  tính người; nó không phản bác được tấm bằng.
+#  脳科学 là một cái thước CỨNG và khác hẳn: nó đo cái đầu chứ không đo hồ sơ.
+#  Có thật trong sổ: quét 376 tiêu đề mang từ khoá của tệp (学歴 · IQ · 地頭 ·
+#  評価されない…) thì 脳科学 là nhãn phổ biến thứ hai sau 心理学, và kênh
+#  「ひとり時間の脳科学」 dùng nó như nhãn mặc định.
+#  Lợi phụ: khác nhãn TL4-T7 (心理学) và khác TL1-T7 (雑学).
+nhan_tieu_de: "脳科学"
+# 21/09/2026 — nguồn mới không cùng khuôn với kênh mình (nhãn ở cuối câu, kèm hashtag và
+# tên kênh họ). Gỡ chữ ký xong thì nhờ AI nắn vỏ câu theo tiêu đề ĐANG THẮNG của kênh,
+# giữ nguyên luận điểm. Mẫu đọc từ chi-so/, khuôn đổi thì mẫu tự đổi.
+nan_khuon_tieu_de: true
+# ── Nhịp nghỉ giữa các phần ──────────────────────────────────────────────────
+#  Bước rà soát đặt một dòng "---" ở ranh giới các phần; tool chèn đúng chừng
+#  này giây im lặng vào đó khi ghép tiếng. Khán giả có nhịp chuyển mình, và
+#  người dựng nhìn sóng âm là thấy ngay chỗ cắt. Để 0 là tắt.
+giay_nghi_phan: 1.2
+engine: "veo3"
+#  6 tấm: ba tấm theo kiểu của kênh (chữ khối to nửa trái), ba tấm `goc_*`
+#  bám BỐ CỤC đọc được từ chính ảnh bìa đối thủ. Chủ dự án, 05/09/2026:
+#  *"cần thêm prompt tạo ảnh để bám đối thủ và giữ cả prompt cũ - cho tao
+#  6 prompt và 6 ảnh để tao lựa chọn nhiều hơn"*.
+#  Đặt cạnh nhau trong cùng một lượt thì so được ngay, không phải cược cả
+#  một video vào một kiểu. Xem KIEU_THUMB trong core/auto_khau.py.
+so_thumbnail: 6
+mo_hinh: "claude-sonnet-5"
+dot_phu_de: false
+am_luong_nhac: 0.12
+nhac_nen: ""
+do_phan_giai: ""
+
+# ── Tự dọn đĩa sau khi video đã lên sóng (21/09/2026) ────────────────────────
+#  Chủ dự án: *"đăng xong - cho video lên hết kiểu công khai rồi xóa all của
+#  mà đó thì làm gì tốn nhiều đâu"*.
+#
+#  `tu_don: true` cho `core/don_dep.py` xoá THẬT phần nặng của một lượt ĐÃ
+#  ĐĂNG: `5-anh/`, `6-clip/`, `8-video.mp4`, `9-video-capcut.mp4`,
+#  `2-giong-doc.mp3`, ảnh bìa không được chọn. Nó KHÔNG đụng mấy tệp nhỏ mà
+#  tính năng khác còn sống nhờ: `0-doi-thu.txt` (chặn remake trùng nguồn),
+#  kịch bản, `3-phu-de.srt`, `4-canh.json`, và tấm bìa đã chọn.
+#
+#  Giữ hạn ân xá mặc định 24 giờ — nó chừa chỗ cho ca YouTube xử lý hỏng phải
+#  tải lại. Ổ đang nâng lên 100 GB nên không cần cắt ngắn hơn để giành chỗ.
+tu_don: true
+don_sau_gio: 24
+
+# ── Trần chi tiêu mỗi ngày ───────────────────────────────────────────────────
+#  Chủ dự án, 21/09/2026: *"tao không tiếc tiền - tao không giới hạn cứ ra sản
+#  phẩm ok nhất - đừng quan tâm tiền vì shopapi là của tao"*.
+#
+#  Nhưng `ngan_sach_ngay: 0` KHÔNG có nghĩa "không giới hạn" — nó là van an
+#  toàn nghĩa là KHÔNG SẢN XUẤT GÌ CẢ (`core/tu_chay.py::_kiem_ngan_sach`).
+#  Nên "không giới hạn" phải viết bằng một con số rất cao. Một video 15 phút
+#  của kênh này ước chừng 80–100 nghìn ₫; năm triệu là gấp khoảng năm mươi
+#  lần, tức không bao giờ chạm tới trong lúc chạy bình thường.
+#
+#  Vẫn để một trần hữu hạn vì nó chặn được VÒNG LẶP LỖI chạy hoang giữa đêm —
+#  lý do là an toàn kỹ thuật, không phải tiếc tiền.
+ngan_sach_ngay: 5000000
+
+# ── Kênh NÀY nằm trong vòng tự chạy (mở khoá 21/09/2026, 21:09) ──────────────
+#  Trước đó khoá này để `false` vì ổ C chỉ còn 8,25 GB trống, không đủ cho van
+#  đĩa (`core/tu_chay.py::_kiem_dia`) mở một video 15 phút. Chủ dự án đã nâng
+#  ổ: đo lại lúc 21:09 ngày 21/09/2026 được 99,4 GB tổng, 58,25 GB trống —
+#  thừa chỗ cho cả ba kênh em.
+#
+#  `tu_duyet` vẫn TẮT: video làm xong vào kế hoạch đăng nhưng KHÔNG có ngày
+#  giờ, nên máy ảo chưa đăng gì. Bật `tu_duyet: true` là bước cuối, làm sau
+#  khi xem kết quả vòng giám sát đầu tiên.
+tu_chay: true
+nhom: "tam-ly-nhat"
+tep: "nguoi-bi-danh-gia-thap-hon-nang-luc-that"
+
+# ── Vòng chấm-sửa kịch bản theo KHÁN GIẢ THẬT (bật 22/09/2026) ──────────────
+#  Khảo sát 22/09 tìm ra `core/vong_cham_sua.py` đã viết xong nhưng chưa kênh
+#  nào bật: sau khi ghép xong bản nháp, một lượt AI đọc kèm ĐƯỜNG GIỮ CHÂN THẬT
+#  (xem trung bình, còn bao nhiêu người ở mốc 10-30-cuối) và BÌNH LUẬN THẬT của
+#  video gần nhất trên chính kênh này, chấm toàn bài (prompt/2g-cham-toan-bai.md)
+#  rồi vá đúng chỗ rớt (prompt/2h-va-toan-bai.md). Đây là vòng học duy nhất
+#  đưa số liệu khán giả của kênh MÌNH ngược vào khâu viết — không có nó thì kênh
+#  chỉ học ở khâu chọn nguồn và đặt tiêu đề.
+#
+#  Kênh chưa có video đã đăng thì khối số liệu tự về "(chưa có)" — vòng vẫn
+#  chạy, chỉ chấm theo tiêu chí chung. 2 vòng: đo trên TL4-T7 vòng ba trở đi
+#  gần như không đổi kết quả (cùng lý do 5 → 3 bản nháp). Tốn thêm 2–4 lượt gọi
+#  chữ mỗi video; chủ dự án: chất lượng trước, không tiếc lượt gọi.
+so_vong_cham: 2
+
+# ── Ngày kênh bắt đầu làm nội dung của tool này (22/09/2026) ──────────
+#  Kênh YouTube CÓ SẴN đổi sang làm tâm lý Nhật. `CHANNEL/TL1-T7/chi-so/` cào
+#  lần đầu sáng 22/09/2026 ra **22 video đăng 2026-06-20 → 2026-07-21** — video
+#  tâm lý của một KHUÔN KHÁC, không phải tool này làm. TL2/TL3-T7 cùng tình
+#  trạng, chỉ là chưa cào.
+#
+#  Chủ dự án, 22/09/2026: *"số liệu 3 kênh mới không dùng được đâu — chỉ dùng
+#  được số liệu TL4-T7 thôi"*. Mốc đặt đúng ngày kênh được tạo trong tool
+#  (21/09/2026), nên mọi video cũ đều nằm ngoài phạm vi cho tới khi chính tool
+#  này đăng video đầu tiên.
+#
+#  Khóa này KHÔNG đổi cách kênh làm video, chỉ định nghĩa video nào được tính
+#  vào số liệu và vòng học (`core/chi_so_ytb/loc_video.py`). Gói raw của video
+#  cũ vẫn nằm nguyên trong `chi-so/` — không xóa gì.
+ngay_bat_dau: "2026-09-21"
+
+# ── Nơi bàn giao video cho máy đăng (22/09/2026) ─────────────────────────────
+#  `vm/may_dang.py` tìm video ở `LOCAL_DONE_ROOT\<mã kênh>`, mặc định là
+#  `Desktop\done\<mã kênh>`. Kênh không khai khoá này thì sản xuất xong video
+#  vẫn NẰM LẠI trong thư mục lượt và máy đăng không bao giờ thấy — đúng chuyện
+#  đã xảy ra với lượt đầu của TL1-T7 tối 22/09.
+thu_muc_done: "C:\Users\Administrator\Desktop\done\TL3-T7"
+
+# ── Giờ đăng mặc định ────────────────────────────────────────────────────────
+#  Máy ảo mở phiên trước giờ này `phien_truoc_phut` phút rồi đăng. Đổi được ở
+#  tab Điều khiển → nút Cài đặt của từng kênh.
+gio_dang: "20:00"
