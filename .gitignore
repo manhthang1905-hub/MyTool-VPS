@@ -19,6 +19,19 @@ CHANNEL/**
 !CHANNEL/**/*.md
 !CHANNEL/**/*.py
 CHANNEL/**/chi-so*/
+# ===== vm/ : ma thi nhan, bo cai + trang thai may thi KHONG =====
+#  `vm/goi-vps/` la bo cai VPS ~1,5 GB (ma + du lieu kenh that + Whisper).
+#  `CLAUDE.local.md` do VPS tu sinh tu `vm/VPS-CLAUDE.md`.
+#  Ba tep trang thai cua may that (`vm/config.json`, `vm/cai-dat-tool.json`,
+#  `vm/trang-thai.json`) cung khong len kho - dung danh sach loai tru ma
+#  `core/chi_so_ytb/tram._GOI_VM_BO_TEP` dung cho goi phat di.
+vm/goi-vps/
+vm/config.json
+vm/cai-dat-tool.json
+vm/trang-thai.json
+vm/ke-hoach-*.csv
+vm/_sheet_cache.json
+CLAUDE.local.md
 # ===== Bi mat / cau hinh rieng may =====
 config.json
 secrets.json
@@ -33,3 +46,10 @@ token*.json
 *cookies*.txt
 *.pem
 *.key
+
+# ── Mọi tệp mang chữ ".secret." — chặn theo TÊN, không theo danh sách ────────
+#  Danh sách tên cụ thể luôn đi sau thực tế: thêm một tệp bí mật mới mà quên
+#  khai ở đây là một lượt `git add -A` đẩy khoá lên kho CÔNG KHAI. Quy ước
+#  "đặt tên có .secret. thì không bao giờ lên kho" bắt được cả tệp chưa tồn
+#  tại (xem tests/test_khong_day_tep_bi_mat.py).
+*.secret.*

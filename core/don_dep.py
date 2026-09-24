@@ -1,4 +1,23 @@
-"""Dọn đĩa VPS sau khi video đã đăng — chỉ xoá thứ NẶNG không ai dùng lại nữa.
+"""Dọn đĩa VPS — chỉ xoá thứ NẶNG không ai dùng lại nữa. HAI luật, không một.
+
+═══ LUẬT MỘT: ĐÃ ĐĂNG + QUÁ HẠN ÂN XÁ (18/09/2026) ═══
+    `ung_vien_don` · cờ `tu_don` + `don_sau_gio` trong `kenh.yaml`.
+
+═══ LUẬT HAI: QUÁ N LƯỢT, KHÔNG HỎI ĐÃ ĐĂNG CHƯA (24/09/2026) ═══
+    `ung_vien_qua_so_luot` · khoá `giu_toi_da_luot` trong `kenh.yaml`.
+
+Vì sao phải có luật hai: đo thật trên VPS ngày 24/09/2026, `PROJECTS/` đã
+**10,4 GB với 12 lượt** (TL1 5 lượt, TL2 3, TL3 4 — lượt `TL3-T7/0002` một mình
+2,4 GB) trên ổ C chỉ 49,4 GB, vì máy tự chạy hai ngày liền. Mà cửa dọn duy nhất
+lúc ấy (luật MỘT) chưa mở được lần nào: chủ dự án chưa duyệt/đăng lượt nào, nên
+không lượt nào có "Trạng thái đăng" ∈ `TRANG_THAI_DA_DANG` → không lượt nào bị
+dọn → đĩa phình mãi. Chủ dự án: *"hằng ngày có tải dữ liệu kênh về thì cũng
+phải có logic dọn dẹp"*.
+
+Luật hai **thêm vào**, không thay: `giu_toi_da_luot: 0` (mặc định) là tắt nó, và
+cả hai luật đều nằm sau cờ `tu_don`. Chi tiết bốn thứ luật hai không bao giờ
+đụng (N lượt mới nhất · lượt chưa xong · cả kênh khi khoá `.khoa` còn tươi ·
+gói đã bàn giao trong `thu_muc_done`): xem docstring `ung_vien_qua_so_luot`.
 
 ═══ VÌ SAO CÓ TỆP NÀY (18/09/2026) ═══
 
@@ -15,9 +34,13 @@ toàn, sau khi chắc chắn video đã lên sóng.
    "đã có sẵn" — `core/auto_khau.VanTay`), và tấm ảnh bìa ĐÃ CHỌN — không tệp nào
    trong số này to, và xoá đi là làm hỏng một tính năng khác đang sống nhờ nó.
    Chỉ `5-anh/`, `6-clip/`, `8-video.mp4`, `9-video-capcut.mp4`,
-   `2-giong-doc.mp3`, ảnh bìa CHƯA chọn, và tệp tạm `*.tam` mới bị xoá.
+   `2-giong-doc.mp3`, ảnh bìa CHƯA chọn, và tệp tạm `*.tam` mới bị xoá (luật
+   HAI xoá thêm `2-doan/` — xem `_MUC_NANG_QUA_SO_LUOT`). Lớp này CHUNG cho cả
+   hai luật: chúng chỉ khác nhau ở câu hỏi "lượt nào đủ điều kiện", không ở
+   câu hỏi "trong một lượt thì được xoá gì".
 
-2. **Chỉ xoá lượt đã ĐĂNG THẬT, và chỉ sau một hạn ân xá.** Đọc đúng dòng kế
+2. **Chỉ xoá lượt đã ĐĂNG THẬT, và chỉ sau một hạn ân xá.** (Riêng luật MỘT;
+   luật HAI thay lớp này bằng trần số lượt + ba cái chốt của nó.) Đọc đúng dòng kế
    hoạch (`core/ke_hoach_dang.py`) — "Trạng thái đăng" phải là "ĐÃ ĐĂNG" (máy) hay
    "ĐÃ ĐĂNG (tay)" (`core/ban_giao_dang.TRANG_THAI_DANG_TAY`). Hạn ân xá
    (`don_sau_gio` trong `kenh.yaml`, mặc định 24 giờ) chừa chỗ cho ca YouTube xử
@@ -33,7 +56,7 @@ toàn, sau khi chắc chắn video đã lên sóng.
 Mặc định của MỌI hàm ở đây là **không xoá gì** (`thuc_hien=False`) — trả về kế
 hoạch để nơi gọi (hoặc người) xem trước. Chỉ khi kênh khai `tu_don: true` trong
 `kenh.yaml` thì `don_theo_cai_dat` mới cho xoá thật; mặc định của khoá đó cũng
-là tắt.
+là tắt. Luật HAI cần THÊM `giu_toi_da_luot > 0` — hai khoá, hai lần đồng ý.
 
 Không mạng, không Qt, không phụ thuộc phần còn lại của tool.
 """
@@ -49,12 +72,14 @@ import stat as _stat
 from typing import Any, Callable, Dict, List, Optional, Sequence
 
 from . import ban_giao_dang, ke_hoach_dang, ghi_dia
-from .auto import duong_luot
+from .auto import doc_luot, duong_luot
 from .kenh import doc_kenh
 
 __all__ = [
-    "TEN_MARKER", "TEN_LOG", "TRANG_THAI_DA_DANG",
-    "ung_vien_don", "don", "don_tat_ca", "don_theo_cai_dat", "don_khan",
+    "TEN_MARKER", "TEN_LOG", "TRANG_THAI_DA_DANG", "LY_DO_DA_DANG",
+    "LY_DO_QUA_SO_LUOT", "KHOA_CON_TUOI_GIAY",
+    "ung_vien_don", "ung_vien_qua_so_luot", "don", "don_tat_ca",
+    "don_theo_cai_dat", "don_khan",
 ]
 
 #: Tên tệp đánh dấu "lượt này đã dọn", nằm ngay trong thư mục lượt.
@@ -69,7 +94,34 @@ TRANG_THAI_DA_DANG = ("ĐÃ ĐĂNG", ban_giao_dang.TRANG_THAI_DANG_TAY)
 #: Tệp/thư mục NẶNG trong một lượt — tên đúng bằng sản phẩm khâu, xem `core/auto.KHAU`.
 _MUC_NANG = ("5-anh", "6-clip", "8-video.mp4", "9-video-capcut.mp4", "2-giong-doc.mp3")
 
+#: THÊM cho luật "quá N lượt" (`ung_vien_qua_so_luot`): các mảnh mp3 giọng đọc
+#: từng đoạn. Lượt ĐÃ ĐĂNG không xoá thư mục này (giữ nguyên `_MUC_NANG` đời
+#: trước, khỏi đổi nết một đường đã chạy ổn), nhưng lượt bị xoá vì quá trần thì
+#: xoá — đo trên `PROJECTS/AUTO/TL3-T7/0002` (24/09/2026) `2-doan/` là phần nặng
+#: thứ ba của lượt, sau `5-anh/` và `6-clip/`.
+_MUC_NANG_QUA_SO_LUOT = _MUC_NANG + ("2-doan",)
+
 _THU_MUC_THUMB = "7-thumbnail"
+
+#: Lý do ghi vào `da-don.json` + `don-dep.log` — để chủ dự án đọc sổ là biết
+#: NGAY vì sao mất, không tưởng tool xoá oan (`core/don_dep.py` từng chỉ có
+#: một lý do nên không cần ghi).
+LY_DO_DA_DANG = "đã đăng, quá hạn ân xá"
+LY_DO_QUA_SO_LUOT = "xoá vì quá {0} lượt, chưa đăng"
+
+#: Khoá `CHANNEL/<kênh>/tu-chay/.khoa` mới hơn ngần này giây thì coi là CÒN
+#: TƯƠI — một lượt có thể đang chạy, luật "quá N lượt" bỏ qua CẢ KÊNH.
+#:
+#: Bằng đúng `core.tu_chay.KHOA_CU_QUA_GIAY` (12 giờ — mốc mà chính `tu_chay`
+#: coi khoá là chết và giành lại). Không `import core.tu_chay` để lấy hằng số:
+#: `tu_chay` đã import `don_dep`, nối thêm chiều ngược là vòng import. Đổi một
+#: bên thì đổi cả bên kia.
+KHOA_CON_TUOI_GIAY = 12 * 3600
+
+#: Khoá độc quyền của vòng tự chạy — `core.tu_chay.TEN_TEP_KHOA`, cùng luật
+#: "không import ngược" như trên.
+_TEN_TEP_KHOA = ".khoa"
+_THU_MUC_TU_CHAY = "tu-chay"
 
 #: Cờ reparse point của Windows (junction, symlink thư mục) — `stat` định nghĩa
 #: hằng này trên mọi hệ điều hành dù chỉ có ý nghĩa trên Windows.
@@ -182,10 +234,15 @@ def _anh_bia_chua_chon(thu_muc_luot: str) -> List[str]:
     return ra
 
 
-def _muc_nang_trong_luot(thu_muc_luot: str) -> List[str]:
-    """Đường dẫn tuyệt đối mọi thứ NẶNG còn nằm trong một thư mục lượt."""
+def _muc_nang_trong_luot(thu_muc_luot: str,
+                         muc: Sequence[str] = _MUC_NANG) -> List[str]:
+    """Đường dẫn tuyệt đối mọi thứ NẶNG còn nằm trong một thư mục lượt.
+
+    `muc`: danh sách tên cần xoá. Mặc định `_MUC_NANG` (luật "đã đăng", giữ
+    nguyên nết đời trước); luật "quá N lượt" truyền `_MUC_NANG_QUA_SO_LUOT`.
+    """
     ra: List[str] = []
-    for ten in _MUC_NANG:
+    for ten in muc:
         p = os.path.join(thu_muc_luot, ten)
         if os.path.exists(p) and not _la_lien_ket(p):
             ra.append(p)
@@ -303,8 +360,155 @@ def ung_vien_don(goc: str, ma_kenh: str, *,
             #: XOÁ DỞ, còn tệ hơn cả không ghi được sổ. Chuỗi ISO của cùng một
             #: định dạng vẫn so sánh CŨ/MỚI đúng bằng so sánh chuỗi thường.
             "moc_dang": moc.isoformat(),
+            #: Vì sao lượt này bị dọn — đi thẳng vào `da-don.json`, `don-dep.log`
+            #: và sổ ngày. Xem `LY_DO_DA_DANG`.
+            "ly_do": LY_DO_DA_DANG,
         })
     return ra
+
+
+# ── Ứng viên theo luật THỨ HAI: quá N lượt, không hỏi đã đăng chưa ───────────
+
+
+def _khoa_con_tuoi(goc: str, ma_kenh: str,
+                   bay_gio: Optional[datetime.datetime] = None) -> bool:
+    """Kênh này có khoá tự chạy CÒN TƯƠI không — tức có thể đang chạy một lượt.
+
+    Tệp khoá (`core.tu_chay._tao_tep_khoa`) chỉ chứa `{"pid", "bat_dau"}`, KHÔNG
+    ghi mã lượt đang chạy — nên không có cách nào biết lượt NÀO đang mở. Đường
+    an toàn duy nhất là bỏ qua CẢ KÊNH khi khoá còn tươi: thà chậm một vòng dọn
+    còn hơn xoá `5-anh/` ngay dưới chân một khâu đang dựng.
+
+    `bat_dau` đọc hỏng thì lùi về thời gian sửa tệp — tệp khoá có mặt mà không
+    đọc được nội dung vẫn là dấu "có người đang giữ", không được coi là sạch.
+    """
+    duong = os.path.join(goc, "CHANNEL", ma_kenh, _THU_MUC_TU_CHAY, _TEN_TEP_KHOA)
+    if not os.path.exists(duong):
+        return False
+    moc: Optional[float] = None
+    try:
+        with open(duong, "r", encoding="utf-8") as tep:
+            du = json.load(tep)
+        if isinstance(du, dict):
+            moc = float(du.get("bat_dau") or 0) or None
+    except (OSError, ValueError, TypeError):
+        moc = None
+    if moc is None:
+        try:
+            moc = os.path.getmtime(duong)
+        except OSError:
+            return True  # có tệp mà không đo được tuổi → coi như còn tươi
+    now = (bay_gio or datetime.datetime.now()).timestamp()
+    return (now - moc) < KHOA_CON_TUOI_GIAY
+
+
+def _ma_luot_tren_dia(auto_goc: str) -> List[str]:
+    """Mã các lượt của một kênh, xếp CŨ → MỚI.
+
+    Chỉ nhận tên toàn CHỮ SỐ — đúng khuôn `core.tu_chay._ma_luot_moi` sinh ra
+    (`"0001"`, `"0002"`…), nên xếp theo giá trị số là xếp theo thứ tự thời gian
+    mà không cần đọc mtime (mtime đổi mỗi lần có ai mở lại thư mục). Tệp lẻ nằm
+    cùng cấp (`anh-tham-chieu.json`) rơi ra ngoài.
+    """
+    try:
+        ten = os.listdir(auto_goc)
+    except OSError:
+        return []
+    so = [t for t in ten if t.isdigit() and os.path.isdir(os.path.join(auto_goc, t))]
+    return sorted(so, key=lambda t: (int(t), t))
+
+
+def ung_vien_qua_so_luot(goc: str, ma_kenh: str, *,
+                         giu: Optional[int] = None,
+                         bay_gio: Optional[datetime.datetime] = None,
+                         ) -> List[Dict[str, Any]]:
+    """Những lượt CŨ hơn `giu` lượt mới nhất — dọn được DÙ CHƯA ĐĂNG.
+
+    ═══ VÌ SAO CẦN LUẬT THỨ HAI (đo thật 24/09/2026) ═══
+
+    `ung_vien_don` ở trên chỉ nhận lượt có "Trạng thái đăng" ∈
+    `TRANG_THAI_DA_DANG`. Chủ dự án chưa duyệt/đăng lượt nào, máy thì tự chạy
+    mỗi giờ — nên `PROJECTS/` lên **10,4 GB / 12 lượt** mà cửa dọn duy nhất
+    không mở được lần nào. Chủ dự án: *"hằng ngày có tải dữ liệu kênh về thì
+    cũng phải có logic dọn dẹp"*. Luật này là cửa thứ hai, không hỏi trạng thái
+    đăng, chỉ hỏi "lượt này còn nằm trong N lượt mới nhất không".
+
+    ═══ BỐN THỨ KHÔNG BAO GIỜ ĐỤNG ═══
+
+    1. **N lượt mới nhất** (`giu`, mặc định `kenh.giu_toi_da_luot`). `giu <= 0`
+       = tắt luật, trả `[]` — hành vi y như trước khoá này ra đời.
+    2. **Lượt chưa xong** — `trang-thai.json` thiếu, đọc hỏng, hay
+       `LuotChay.xong_het` còn `False`. Lượt dở còn đang chờ chạy tiếp, xoá
+       `5-anh/` của nó là bắt làm lại từ đầu.
+    3. **Cả kênh, khi khoá `tu-chay/.khoa` còn tươi** — xem `_khoa_con_tuoi`.
+    4. **Gói đã bàn giao trong `thu_muc_done`** — khác hẳn `ung_vien_don` (luật
+       kia gom cả gói vào danh sách xoá vì lượt ẤY đã lên sóng rồi). Ở đây lượt
+       CHƯA đăng, nên gói trong `done/` chính là thứ đang CHỜ chủ dự án đăng:
+       xoá nó là làm mất việc, không phải dọn rác.
+
+    Giữ ĐÚNG danh sách tệp nhỏ mà `ung_vien_don` giữ (`0-doi-thu.txt`, kịch
+    bản `1-*`, `3-phu-de.srt`, `4-canh.json`, `_van-tay-*.json`, bìa ĐÃ CHỌN,
+    `trang-thai.json`) — cùng một `_muc_nang_trong_luot`, chỉ thêm `2-doan/`.
+
+    Trả về danh sách dict CÙNG KHUÔN `ung_vien_don` (để `_xoa_mot_ung_vien` và
+    `don_khan` dùng lại y nguyên), với `ly_do` = `LY_DO_QUA_SO_LUOT`.
+    """
+    if bay_gio is None:
+        bay_gio = datetime.datetime.now()
+    if giu is None:
+        giu = doc_kenh(goc, ma_kenh).giu_toi_da_luot
+    giu = int(giu or 0)
+    if giu <= 0:
+        return []
+    if _khoa_con_tuoi(goc, ma_kenh, bay_gio):
+        return []
+
+    auto_goc = os.path.join(goc, "PROJECTS", "AUTO", ma_kenh)
+    if not os.path.isdir(auto_goc) or _la_lien_ket(auto_goc):
+        return []
+    tat_ca = _ma_luot_tren_dia(auto_goc)
+    cu = tat_ca[:-giu] if giu < len(tat_ca) else []
+    ly_do = LY_DO_QUA_SO_LUOT.format(giu)
+
+    ra: List[Dict[str, Any]] = []
+    for luot in cu:
+        thu_muc_luot = duong_luot(goc, ma_kenh, luot)
+        if not os.path.isdir(thu_muc_luot) or _la_lien_ket(thu_muc_luot):
+            continue
+        if not _trong_thu_muc(thu_muc_luot, auto_goc):
+            continue
+        try:
+            tt = doc_luot(thu_muc_luot)
+        except Exception:  # noqa: BLE001 — một lượt đọc hỏng không chặn lượt khác
+            continue
+        if tt is None or not tt.xong_het:
+            continue  # chưa xong (hay chưa có trang-thai.json) — không đụng
+        duong_xoa = _muc_nang_trong_luot(thu_muc_luot, _MUC_NANG_QUA_SO_LUOT)
+        if not duong_xoa:
+            continue  # đã sạch từ trước
+        ra.append({
+            "kenh": ma_kenh,
+            "luot": luot,
+            "ma_goi": "{0}-{1}".format(ma_kenh, luot),
+            "thu_muc_luot": thu_muc_luot,
+            "duong": duong_xoa,
+            "bytes": sum(_kich_thuoc(p) for p in duong_xoa),
+            #: Lượt này CHƯA đăng nên không có mốc đăng. Dùng lúc sửa thư mục
+            #: lượt làm khoá xếp thứ tự cho `don_khan` (cũ nhất xoá trước) —
+            #: cùng định dạng chuỗi ISO với `ung_vien_don` để hai nguồn ứng
+            #: viên xếp chung được trong một `sort`.
+            "moc_dang": _moc_thu_muc_iso(thu_muc_luot),
+            "ly_do": ly_do,
+            "chua_dang": True,
+        })
+    return ra
+
+
+def _moc_thu_muc_iso(thu_muc: str) -> str:
+    try:
+        return datetime.datetime.fromtimestamp(os.path.getmtime(thu_muc)).isoformat()
+    except OSError:
+        return ""
 
 
 # ── Xoá thật ─────────────────────────────────────────────────────────────────
@@ -318,21 +522,25 @@ def _duong_ghi_luot(thu_muc_luot: str, duong: str) -> str:
 
 
 def _ghi_marker(thu_muc_luot: str, ma_goi: str, da_xoa: Sequence[str],
-                so_bytes: int, luc: datetime.datetime) -> None:
+                so_bytes: int, luc: datetime.datetime, ly_do: str = "") -> None:
     ghi_dia.ghi_json(os.path.join(thu_muc_luot, TEN_MARKER), {
         "ma_goi": ma_goi,
         "luc": luc.strftime("%Y-%m-%d %H:%M:%S"),
         "bytes": so_bytes,
+        "ly_do": ly_do or LY_DO_DA_DANG,
         "xoa": [_duong_ghi_luot(thu_muc_luot, p) for p in da_xoa],
     })
 
 
 def _ghi_log(goc: str, ma_kenh: str, ma_goi: str, so_bytes: int,
-            so_muc: int, luc: datetime.datetime) -> None:
+            so_muc: int, luc: datetime.datetime, ly_do: str = "") -> None:
     duong = os.path.join(goc, "CHANNEL", ma_kenh, "tu-chay", TEN_LOG)
     os.makedirs(os.path.dirname(duong), exist_ok=True)
-    dong = "{0}\tgói {1}\txoá {2} mục\t{3} byte\n".format(
-        luc.strftime("%Y-%m-%d %H:%M:%S"), ma_goi, so_muc, so_bytes)
+    # Cột LÝ DO ở cuối, không chen vào giữa: sổ cũ đọc bằng mắt (và bằng
+    # `split("\t")` nếu có ai viết) vẫn thấy đúng bốn cột đầu như trước.
+    dong = "{0}\tgói {1}\txoá {2} mục\t{3} byte\t{4}\n".format(
+        luc.strftime("%Y-%m-%d %H:%M:%S"), ma_goi, so_muc, so_bytes,
+        ly_do or LY_DO_DA_DANG)
     try:
         with open(duong, "a", encoding="utf-8") as tep:
             tep.write(dong)
@@ -365,27 +573,57 @@ def _xoa_mot_ung_vien(goc: str, ma_kenh: str, u: Dict[str, Any],
         da_xoa.append(p)
     if not da_xoa:
         return None
-    _ghi_marker(u["thu_muc_luot"], u["ma_goi"], da_xoa, u["bytes"], bay_gio)
-    _ghi_log(goc, ma_kenh, u["ma_goi"], u["bytes"], len(da_xoa), bay_gio)
+    ly_do = str(u.get("ly_do") or LY_DO_DA_DANG)
+    _ghi_marker(u["thu_muc_luot"], u["ma_goi"], da_xoa, u["bytes"], bay_gio, ly_do)
+    _ghi_log(goc, ma_kenh, u["ma_goi"], u["bytes"], len(da_xoa), bay_gio, ly_do)
     return {**u, "da_xoa": da_xoa}
+
+
+def _gop_ung_vien(*nguon: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Gộp nhiều danh sách ứng viên, MỘT lượt chỉ vào một lần.
+
+    Hai luật có thể cùng nhận một lượt (đã đăng, quá hạn ân xá, VÀ đã ra ngoài
+    N lượt mới nhất). Để nó vào hai lần là `_xoa_mot_ung_vien` chạy hai lượt
+    trên cùng thư mục — lần hai không xoá được gì nên trả `None`, vô hại, nhưng
+    `tong_bytes` thì đã cộng đôi và sổ ngày báo số gấp đôi số thật. Ưu tiên
+    bản ĐẦU TIÊN (luật "đã đăng" đứng trước): lý do của nó đúng hơn.
+    """
+    ra: List[Dict[str, Any]] = []
+    da_co: set = set()
+    for danh_sach in nguon:
+        for u in danh_sach:
+            khoa = (str(u.get("kenh") or ""), str(u.get("luot") or ""))
+            if khoa in da_co:
+                continue
+            da_co.add(khoa)
+            ra.append(u)
+    return ra
 
 
 def don(goc: str, ma_kenh: str, *, thuc_hien: bool = False,
         bay_gio: Optional[datetime.datetime] = None,
-        cho_gio: Optional[float] = None) -> Dict[str, Any]:
-    """Dọn các lượt đã đăng (quá hạn ân xá) của một kênh.
+        cho_gio: Optional[float] = None,
+        giu_toi_da_luot: Optional[int] = None) -> Dict[str, Any]:
+    """Dọn một kênh theo CẢ HAI luật: lượt đã đăng quá hạn ân xá, và lượt đã
+    ra ngoài `giu_toi_da_luot` lượt mới nhất (dù chưa đăng).
 
     `thuc_hien=False` (mặc định): chỉ TÍNH, không đụng đĩa — trả kế hoạch +
     tổng byte sẽ giải phóng. `thuc_hien=True`: xoá đúng những đường đã tính,
     ghi tệp đánh dấu `da-don.json` vào từng thư mục lượt và thêm một dòng vào
-    `CHANNEL/<kênh>/tu-chay/don-dep.log`.
+    `CHANNEL/<kênh>/tu-chay/don-dep.log` (kèm LÝ DO, xem `_ghi_log`).
+
+    `giu_toi_da_luot`: `None` (mặc định) = lấy từ `kenh.yaml`; `0` = tắt luật
+    thứ hai, hành vi y như trước khi luật ấy ra đời.
 
     Gọi lại nhiều lần là an toàn: lượt đã dọn sạch không còn gì NẶNG để tính
-    vào ứng viên nữa (`ung_vien_don`), nên lần gọi sau không làm gì thêm.
+    vào ứng viên nữa, nên lần gọi sau không làm gì thêm.
     """
     if bay_gio is None:
         bay_gio = datetime.datetime.now()
-    ke_hoach = ung_vien_don(goc, ma_kenh, bay_gio=bay_gio, cho_gio=cho_gio)
+    ke_hoach = _gop_ung_vien(
+        ung_vien_don(goc, ma_kenh, bay_gio=bay_gio, cho_gio=cho_gio),
+        ung_vien_qua_so_luot(goc, ma_kenh, giu=giu_toi_da_luot, bay_gio=bay_gio),
+    )
     ket_qua: Dict[str, Any] = {
         "kenh": ma_kenh,
         "thuc_hien": bool(thuc_hien),
@@ -421,7 +659,11 @@ def don_theo_cai_dat(goc: str, ma_kenh: str) -> Dict[str, Any]:
     if not kenh.tu_don:
         return {"kenh": ma_kenh, "chay": False,
                "ly_do": "kênh chưa bật `tu_don` trong kenh.yaml — không đụng gì."}
-    ket_qua = don(goc, ma_kenh, thuc_hien=True, cho_gio=kenh.don_sau_gio)
+    # Luật "quá N lượt" đi cùng cửa này, tức vẫn nằm SAU `tu_don`: một trần số
+    # lượt không được biến một kênh chủ dự án đã CHỌN không dọn thành kênh bị
+    # dọn. Muốn bật thì bật cả hai khoá.
+    ket_qua = don(goc, ma_kenh, thuc_hien=True, cho_gio=kenh.don_sau_gio,
+                  giu_toi_da_luot=kenh.giu_toi_da_luot)
     ket_qua["chay"] = True
     return ket_qua
 
@@ -489,7 +731,13 @@ def don_khan(goc: str, danh_sach_kenh: Sequence[str], *, nguong_gb: float,
             bo_qua.append(ma)
             continue
         try:
-            ung_vien_tat_ca.extend(ung_vien_don(goc, ma, bay_gio=bay_gio, cho_gio=kenh.don_sau_gio))
+            ung_vien_tat_ca.extend(_gop_ung_vien(
+                ung_vien_don(goc, ma, bay_gio=bay_gio, cho_gio=kenh.don_sau_gio),
+                # Đúng luật của dọn thường, không nới lỏng: `giu_toi_da_luot`
+                # của chính kênh ấy. Kênh để `0` thì cửa này vẫn chỉ thấy lượt
+                # ĐÃ ĐĂNG, dù đĩa sắp đầy tới đâu.
+                ung_vien_qua_so_luot(goc, ma, giu=kenh.giu_toi_da_luot, bay_gio=bay_gio),
+            ))
         except Exception:  # noqa: BLE001 — kế hoạch đăng của MỘT kênh hỏng không chặn kênh khác
             continue
 

@@ -450,6 +450,27 @@ class Kenh:
     #: Chờ bao nhiêu GIỜ sau khi đăng mới xoá — hạn ân xá phòng khi YouTube xử
     #: lý hỏng và phải tải lại. 24 (mặc định). Chỉ có tác dụng khi `tu_don: true`.
     don_sau_gio: int = 24
+    #: GIỮ TỐI ĐA BAO NHIÊU LƯỢT của kênh này trên đĩa — luật dọn thứ hai của
+    #: `core/don_dep.py`, KHÔNG phụ thuộc "đã đăng".
+    #:
+    #: ═══ VÌ SAO CÓ KHOÁ NÀY (đo thật 24/09/2026) ═══
+    #:
+    #: `tu_don` + `don_sau_gio` chỉ xoá lượt có "Trạng thái đăng" ∈
+    #: `don_dep.TRANG_THAI_DA_DANG`. Máy tự chạy hai ngày, chủ dự án chưa duyệt
+    #: /đăng lượt nào → KHÔNG lượt nào thoả điều kiện → `PROJECTS/` phình lên
+    #: **10,4 GB với 12 lượt** (TL1 5 lượt, TL2 3, TL3 4; lượt nặng nhất
+    #: `TL3-T7/0002` một mình 2,4 GB) trên ổ C chỉ 49,4 GB. Chủ dự án:
+    #: *"hằng ngày có tải dữ liệu kênh về thì cũng phải có logic dọn dẹp"*.
+    #:
+    #: Nên cần một trần KHÔNG hỏi tới trạng thái đăng: giữ N lượt MỚI NHẤT,
+    #: lượt cũ hơn thì xoá phần NẶNG dù chưa đăng. Tệp nhỏ (`0-doi-thu.txt`,
+    #: kịch bản, `3-phu-de.srt`, `4-canh.json`, bìa đã chọn, `trang-thai.json`)
+    #: vẫn giữ nguyên — vòng học và chặn remake trùng còn đọc chúng.
+    #:
+    #: `0` (mặc định) = TẮT luật này, hành vi y như trước khoá này ra đời. Luật
+    #: này vẫn nằm sau cờ `tu_don`: kênh chưa bật `tu_don` thì không bao giờ bị
+    #: xoá tự động, dù đặt số ở đây.
+    giu_toi_da_luot: int = 0
 
     #: NGÀY KÊNH BẮT ĐẦU LÀM NỘI DUNG CỦA TOOL NÀY, dạng ISO `"YYYY-MM-DD"`.
     #: Video đăng TRƯỚC ngày này không được tính vào số liệu và vòng học.
@@ -744,6 +765,9 @@ def doc_kenh(goc: str, ma: str) -> Kenh:
         video_moi_ngay=max(1, int(_so(cai.get("video_moi_ngay"), 1))),
         tu_don=_co(cai.get("tu_don")),
         don_sau_gio=max(0, int(_so(cai.get("don_sau_gio"), 24))),
+        # Âm là gõ nhầm, và âm ở đây nghĩa là "giữ ít hơn 0 lượt" — kẹp về 0
+        # (tắt) chứ không để nó thành một trần xoá sạch mọi lượt.
+        giu_toi_da_luot=max(0, int(_so(cai.get("giu_toi_da_luot"), 0))),
         # Chuẩn hoá qua `loc_video.chuan_ngay`: PyYAML đổi `ngay_bat_dau:
         # 2026-08-22` KHÔNG bọc nháy thành `datetime.date`, và một ngày gõ sai
         # ("2026-13-45") phải thành rỗng — tức là KHÔNG LỌC — chứ không được

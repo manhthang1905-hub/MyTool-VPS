@@ -577,3 +577,37 @@ phiên rỗng. Đo: TL2-T7 mở 14:51:35 ngay sau TL1 vừa đóng, không có d
 "0 lấy được · 8 chưa về"; TL1 (14:45) và TL3 (14:59) mở lúc rảnh thì nạp được.
 Sửa: launcher riêng của kênh (`<MÃ>.exe`) thì chỉ hỏi đúng tên nó. Chạy lại TL2
 lúc 15:06: "đã nạp … vào TL2-T7", **1 lấy được**. 74 test liên quan xanh.
+
+## 2026-09-24 — Gộp thư mục (một nửa) + luật dọn đĩa không chờ "đã đăng"
+
+**Vì sao:** chủ dự án muốn *"all sử dụng chỉ ở 1 thư mục"* và *"hằng ngày có tải
+dữ liệu kênh về thì cũng phải có logic dọn dẹp"*. Đo được: `PROJECTS/` đã 10,4 GB
+với 12 lượt video (TL1 5, TL2 3, TL3 4) — máy tự chạy hai ngày đúng thiết kế,
+nhưng `don_dep` chỉ xoá đồ nặng của lượt **ĐÃ ĐĂNG**, mà chưa lượt nào được
+duyệt nên không gì bị dọn.
+
+**Gộp `vm/` — CỐ Ý DỪNG NỬA CHỪNG.** Đã chép `TLm\` → `MyToolm\` làm bản
+gương MÃ (126 tệp, bỏ `goi-vps/` 1,5 GB và 7 tệp trạng thái máy theo đúng
+`tram._GOI_VM_BO_TEP`). Nhờ đó pytest **157 fail → 20 fail** (bộ test vốn đòi
+`MyTool/vm/`). NHƯNG không chuyển `vps.json` sang đường mới và không đổi tên
+`TLm\`: 12 chỗ trong `vm/agent.py`, `may_dang.py`, `may_cmt.py`,
+`giao_dien.py` tìm trình duyệt kênh / `client_secret` / `tokens` bằng
+`dirname(<thư mục vm>)` = `TL\`, nơi `TL1-T7\TL1-T7.exe`… đang nằm. Lồng vào
+`MyTool\` là `dirname` thành `TL\MyTool\` — không có bộ trình duyệt nào, agent
+không mở được phiên, máy đăng và máy cmt chết IM LẶNG. Muốn lồng thật thì phải
+sửa 12 chỗ ấy (dò lên hai cấp) hoặc dời luôn bốn thư mục trình duyệt vào
+`MyTool\`, và phải nghiệm chứng bằng một phiên thật.
+
+**Luật dọn thứ hai** (`don_dep.ung_vien_qua_so_luot`, khoá `giu_toi_da_luot`,
+mặc định 0 = tắt, nằm SAU `tu_don` nên phải đồng ý hai lần): giữ N lượt mới
+nhất, lượt cũ hơn xoá đồ nặng **dù chưa đăng**. Bốn chốt: N lượt mới nhất ·
+lượt chưa `xong_het` · cả kênh khi `tu-chay/.khoa` còn tươi (<12 h) · KHÔNG
+đụng gói trong `thu_muc_done` (đó là thứ đang chờ đăng). Sổ ghi rõ lý do
+"xoá vì quá N lượt, chưa đăng". `giu_toi_da_luot: 3` cho TL1/TL2/TL3; TL4-T7
+giữ 0. Có ô chỉnh trong ⚙ Cài đặt. Lần dọn tới giải phóng ~1,57 GB.
+
+**Cũng trong ngày:** khai `thu_muc_done` = `Desktop\done\<mã kênh>` và
+`gio_dang: 20:00` cho ba kênh em — trước đó video làm xong nằm kẹt trong thư
+mục lượt, máy đăng không thấy. Lịch `ShopAPI-TuChay` nay lặp mỗi 60 phút tới
+hết ngày (`NHIP_THU_LAI_PHUT`) nên lượt hỏng vì máy chủ bận tự được nhặt lại —
+đây là thứ đưa TL1-T7 từ 116 ảnh lên video hoàn chỉnh mà không ai đụng vào.

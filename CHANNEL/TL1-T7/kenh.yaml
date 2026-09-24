@@ -158,6 +158,22 @@ do_phan_giai: ""
 tu_don: true
 don_sau_gio: 24
 
+# ── Trần SỐ LƯỢT giữ trên đĩa — dọn cả lượt CHƯA đăng (24/09/2026) ───────────
+#  Đo thật hôm nay: `PROJECTS/` đã 10,4 GB với 12 lượt (TL1 5 lượt, TL2 3, TL3
+#  4 — riêng `TL3-T7/0002` 2,4 GB) trên ổ C 49,4 GB, vì máy tự chạy hai ngày.
+#  Mà `tu_don` ở trên chưa dọn được lượt nào: nó chỉ xét lượt ĐÃ ĐĂNG, còn chủ
+#  dự án chưa duyệt/đăng lượt nào. Chủ dự án: *"hằng ngày có tải dữ liệu kênh
+#  về thì cũng phải có logic dọn dẹp"*.
+#
+#  `giu_toi_da_luot: 3` = giữ 3 lượt MỚI NHẤT của kênh; lượt cũ hơn bị xoá phần
+#  nặng (thêm cả `2-doan/`) DÙ CHƯA ĐĂNG. Vẫn giữ nguyên các tệp nhỏ kể ở trên.
+#  Bốn thứ luật này không bao giờ đụng: 3 lượt mới nhất, lượt chưa xong
+#  (`trang-thai.json` chưa `xong_het`), cả kênh khi khoá `tu-chay/.khoa` còn
+#  tươi, và gói đã bàn giao trong `thu_muc_done` (đó là thứ đang CHỜ đăng).
+#
+#  `0` = tắt luật này. Luật này vẫn nằm sau `tu_don` ở trên.
+giu_toi_da_luot: 3
+
 # ── Trần chi tiêu mỗi ngày ───────────────────────────────────────────────────
 #  Chủ dự án, 21/09/2026: *"tao không tiếc tiền - tao không giới hạn cứ ra sản
 #  phẩm ok nhất - đừng quan tâm tiền vì shopapi là của tao"*.

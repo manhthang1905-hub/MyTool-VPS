@@ -262,6 +262,47 @@ def test_tien_moi_ngay_sua_duoc_trong_hop(bon_cot, qapp):
     assert int(doc_kenh(goc, "TL2-T7").ngan_sach_ngay) == 333_000
 
 
+def test_giu_toi_da_luot_sua_duoc_trong_hop(bon_cot, qapp):
+    """Trần SỐ LƯỢT giữ trên đĩa phải chỉnh được NGAY TRÊN GIAO DIỆN.
+
+    Chủ dự án, 21/09/2026: *"tao muốn nó đơn giản hiệu quả mà có thể quản lý và
+    thiết lập all ở gui để chủ động"*. Ô này phải rơi đúng khoá
+    `giu_toi_da_luot` trong `kenh.yaml` — thứ `core/don_dep.ung_vien_qua_so_luot`
+    đọc — và KHÔNG ghi lây sang kênh bên cạnh.
+    """
+    from core.kenh import doc_kenh
+
+    t, _app, goc = bon_cot
+    hop = t._hop_cai["TL2-T7"]
+    hop.o_giu_luot.setValue(4)
+    hop._hen_giu.stop()
+    t._doi_giu_luot("TL2-T7", hop.o_giu_luot.value())
+    qapp.processEvents()
+    assert int(doc_kenh(goc, "TL2-T7").giu_toi_da_luot) == 4
+    assert int(doc_kenh(goc, "TL1-T7").giu_toi_da_luot) == 0
+
+    # 0 phải ghi được — đó là cách TẮT luật, không phải "bỏ trống".
+    hop.o_giu_luot.setValue(0)
+    hop._hen_giu.stop()
+    t._doi_giu_luot("TL2-T7", hop.o_giu_luot.value())
+    qapp.processEvents()
+    assert int(doc_kenh(goc, "TL2-T7").giu_toi_da_luot) == 0
+
+
+def test_giu_toi_da_luot_noi_that_khi_tu_don_dang_tat(bon_cot, qapp):
+    """Đặt một con số mà "Tự dọn" tắt thì không có gì xảy ra — phải nói ra, đừng
+    để người ta ngồi đợi (`MyTool/CLAUDE.md`, "Nói thật khi hỏng")."""
+    t, _app, _goc = bon_cot
+    hop = t._hop_cai["TL1-T7"]
+
+    hop.nap({"tu_don": False, "giu_toi_da_luot": 3}, {})
+    assert "chỉ có tác dụng khi" in hop.nhan_giu_luot.text()
+    assert hop.o_giu_luot.value() == 3
+
+    hop.nap({"tu_don": True, "giu_toi_da_luot": 3}, {})
+    assert "chỉ có tác dụng khi" not in hop.nhan_giu_luot.text()
+
+
 # ── 5. Câu tình trạng ────────────────────────────────────────────────────────
 
 #: `(ảnh chụp kênh, câu phải hiện ra)` — năm trạng thái người ta gặp thật.

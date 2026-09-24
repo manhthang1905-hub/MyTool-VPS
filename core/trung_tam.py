@@ -1025,6 +1025,9 @@ def _mot_kenh(goc: str, ma: str, cai: Dict[str, Any], *, bay_gio: _dt.datetime,
         "tu_don": str(cai.get("tu_don")).strip().lower() in ("true", "yes", "1"),
         "gio_dang": str(cai.get("gio_dang") or "").strip(),
         "ngan_sach_ngay": ngan_sach, "thu_muc_done": thu_muc_done,
+        # Trần số lượt giữ trên đĩa (`core/don_dep.ung_vien_qua_so_luot`) — ô
+        # "Giữ tối đa" trong hộp ⚙ Cài đặt đọc khoá này. `0` = không có trần.
+        "giu_toi_da_luot": max(0, int(_so(cai.get("giu_toi_da_luot")) or 0)),
         "bay_gio": bay,
         "dang_chay": khoa is not None,
         "video": {"tieu_de": tieu_de, "ma_luot": ma_luot, "ma_goi": ma_goi},

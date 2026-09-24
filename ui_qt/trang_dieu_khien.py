@@ -437,14 +437,15 @@ class HopCaiDatKenh(QDialog):
     Một cột dọc, mỗi dòng một việc, mỗi việc một câu giải thích ngay dưới.
     **Không có nút Lưu** — sửa là ghi. Ba cửa ghi, đều là cửa có sẵn:
     `core.trung_tam.ghi_cai_kenh` cho `kenh.yaml` (giờ đăng · tự chạy · tự
-    dọn · tiền mỗi ngày) và `core.vm_cai_dat.luu` cho `may-ao.json` (tự đăng ·
-    trả lời bình luận · phút mở phiên).
+    dọn · giữ tối đa N lượt · tiền mỗi ngày) và `core.vm_cai_dat.luu` cho
+    `may-ao.json` (tự đăng · trả lời bình luận · phút mở phiên).
     """
 
     xin_cong_tac = pyqtSignal(str, str, bool)
     xin_ngan_sach = pyqtSignal(str, int)
     xin_gio_dang = pyqtSignal(str, str)
     xin_phut_phien = pyqtSignal(str, int)
+    xin_giu_luot = pyqtSignal(str, int)
 
     #: Bốn công tắc, nhãn NGẮN và bằng TIẾNG VIỆT. Khoá kỹ thuật (`tu_dang`,
     #: `tu_tra_loi_cmt`) chỉ sống trong mã, không bao giờ hiện lên màn hình —
@@ -516,6 +517,28 @@ class HopCaiDatKenh(QDialog):
             doc.addSpacing(4)
             self.o_cong_tac[khoa] = o
 
+        # ── Giữ tối đa N lượt ───────────────────────────────────────────────
+        # Đi NGAY SAU công tắc "Tự dọn" vì nó là núm vặn của đúng công tắc ấy:
+        # `core/don_dep.py` chỉ dùng số này khi `tu_don` bật.
+        self.o_giu_luot = QSpinBox()
+        # 0 = tắt trần, nên phải cho gõ được 0. Trần 50 đủ rộng cho mọi ý định
+        # thật (một kênh làm 1 video/ngày) mà không cho gõ một số vô nghĩa.
+        self.o_giu_luot.setRange(0, 50)
+        self.o_giu_luot.setSpecialValueText("Không giới hạn")
+        self.o_giu_luot.setSuffix(" lượt")
+        self.o_giu_luot.setFixedWidth(130)
+        self.o_giu_luot.setToolTip(
+            "Giữ bao nhiêu lượt MỚI NHẤT của kênh trên đĩa.\n"
+            "Lượt cũ hơn bị xoá ảnh/clip/mp3/video DÙ CHƯA ĐĂNG — chữ, phụ đề,\n"
+            "bìa đã chọn thì vẫn giữ.\n"
+            "Để 0 nghĩa là không có trần: chỉ lượt ĐÃ ĐĂNG mới bị dọn.")
+        self.o_giu_luot.valueChanged.connect(lambda _v: self._hen_giu_luot())
+        self.nhan_giu_luot = self._them(
+            "Giữ tối đa", self.o_giu_luot,
+            "Quá số lượt này thì lượt cũ nhất bị xoá ảnh, clip và bản dựng cho "
+            "nhẹ ổ đĩa — kể cả khi chưa đăng. Chữ, phụ đề và bìa đã chọn vẫn "
+            "còn. Để “Không giới hạn” thì chỉ lượt đã đăng mới bị dọn.", doc)
+
         # ── Tiền mỗi ngày ───────────────────────────────────────────────────
         self.o_ngan_sach = QSpinBox()
         self.o_ngan_sach.setRange(0, 50_000_000)
@@ -577,6 +600,11 @@ class HopCaiDatKenh(QDialog):
         self._hen_gio.timeout.connect(
             lambda: self.xin_gio_dang.emit(
                 self._ma, self.o_gio_dang.time().toString("HH:mm")))
+        self._hen_giu = QTimer(self)
+        self._hen_giu.setSingleShot(True)
+        self._hen_giu.setInterval(800)
+        self._hen_giu.timeout.connect(
+            lambda: self.xin_giu_luot.emit(self._ma, self.o_giu_luot.value()))
 
     # ── Dựng ─────────────────────────────────────────────────────────────────
 
@@ -644,6 +672,26 @@ class HopCaiDatKenh(QDialog):
                 o.setChecked(gia_tri.get(khoa, False))
                 o.blockSignals(False)
 
+            if not self.o_giu_luot.hasFocus():
+                try:
+                    giu = int(k.get("giu_toi_da_luot") or 0)
+                except (TypeError, ValueError):
+                    giu = 0
+                self.o_giu_luot.blockSignals(True)
+                self.o_giu_luot.setValue(max(0, min(50, giu)))
+                self.o_giu_luot.blockSignals(False)
+            # Số lượt chỉ có tác dụng khi "Tự dọn" bật — nói thẳng ra, đừng để
+            # người ta đặt một con số rồi không thấy gì xảy ra
+            # (`MyTool/CLAUDE.md`, "Nói thật khi hỏng").
+            self.nhan_giu_luot.setText(
+                "Quá số lượt này thì lượt cũ nhất bị xoá ảnh, clip và bản dựng "
+                "cho nhẹ ổ đĩa — kể cả khi chưa đăng. Chữ, phụ đề và bìa đã "
+                "chọn vẫn còn. Để “Không giới hạn” thì chỉ lượt đã đăng mới bị "
+                "dọn."
+                if k.get("tu_don") else
+                "Số này chỉ có tác dụng khi “Tự dọn” ở trên đang bật — hiện "
+                "tool không xoá gì của kênh này cả.")
+
             tran = int(k.get("ngan_sach_ngay") or 0)
             if not self.o_ngan_sach.hasFocus():
                 self.o_ngan_sach.blockSignals(True)
@@ -663,6 +711,10 @@ class HopCaiDatKenh(QDialog):
     def _hen_ngan_sach(self) -> None:
         if not self._dang_nap:
             self._hen.start()
+
+    def _hen_giu_luot(self) -> None:
+        if not self._dang_nap:
+            self._hen_giu.start()
 
     def _bao_gio_dang(self) -> None:
         if not self._dang_nap:
@@ -1282,6 +1334,7 @@ class TrangDieuKhien(QWidget):
                 hop.xin_ngan_sach.connect(self._doi_ngan_sach)
                 hop.xin_gio_dang.connect(self._doi_gio_dang)
                 hop.xin_phut_phien.connect(self._doi_phut_phien)
+                hop.xin_giu_luot.connect(self._doi_giu_luot)
                 c.hop_cai = hop
                 self._hop_cai[ma] = hop
                 nk = HopNhatKyKenh(ma, self)
@@ -1678,6 +1731,19 @@ class TrangDieuKhien(QWidget):
         try:
             tt.ghi_cai_kenh(self._app.base_dir, ma, ngan_sach_ngay=int(gia_tri))
         except Exception as loi:  # noqa: BLE001
+            self._app.show_error(loi)
+
+    def _doi_giu_luot(self, ma: str, so: int) -> None:
+        """Trần SỐ LƯỢT giữ trên đĩa — khoá `giu_toi_da_luot` trong `kenh.yaml`.
+
+        Cùng cửa ghi với giờ đăng / trần tiền (`core.trung_tam.ghi_cai_kenh`),
+        và cùng khoá mà `core/don_dep.ung_vien_qua_so_luot` đọc. `0` = tắt trần.
+        """
+        if not self._con_song() or not ma:
+            return
+        try:
+            tt.ghi_cai_kenh(self._app.base_dir, ma, giu_toi_da_luot=int(so))
+        except Exception as loi:  # noqa: BLE001 — lưu hỏng phải nói, không văng
             self._app.show_error(loi)
 
     def _doi_gio_dang(self, ma: str, gio: str) -> None:
